@@ -19,7 +19,7 @@ SOURCE_DIR = Path.home() / "Documents" / "my" / "Kitty" / "HuaweiExport"
 OUTPUT_DIR = Path.home() / "Documents" / "my" / "Kitty" / "SamsungObsidian"
 
 NOTES_DIR = OUTPUT_DIR / "Notes"
-ATTACHMENTS_DIR = OUTPUT_DIR / "Attachments"
+ATTACHMENTS_DIR = NOTES_DIR / "Attachments"
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 NOTES_DIR.mkdir(parents=True, exist_ok=True)
