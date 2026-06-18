@@ -257,7 +257,7 @@ def html_content_to_markdown(html_content):
             filename = Path(content).name
 
             markdown_lines.append(
-                f"![[{filename}]]"
+                f"![[Attachments/{filename}]]"
             )
 
         else:
