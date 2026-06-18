@@ -17,8 +17,6 @@ from xml.etree import ElementTree as ET
 SOURCE_DIR = Path.home() / "Documents" / "my" / "Kitty" / "HuaweiExport"
 OUTPUT_DIR = Path.home() / "Documents" / "my" / "Kitty" / "SamsungObsidian"
 
-Documents/my/Kitty/notes
-
 NOTES_DIR = OUTPUT_DIR / "Notes"
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
