@@ -367,11 +367,13 @@ for note_dir in SOURCE_DIR.iterdir():
                     )
                 )
 
+
             except Exception as ex:
 
                 migration_log.append(
                     f"[HTML_FALLBACK] "
-                    f"{title}: {ex}"
+                    f"{title}: {ex}\n"
+                    f"{html_content[:1000]}\n"
                 )
 
                 markdown_body = (
