@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import shutil
-import unicodedata
 import csv
+import html
 import json
 import re
+import shutil
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -207,6 +208,17 @@ def inline_to_markdown(element):
 def html_content_to_markdown(html_content):
 
     markdown_lines = []
+
+    html_content = html.unescape(
+        html_content
+    )
+
+    html_content = html_content.replace(
+        "<br>",
+        "<br/>"
+    )
+
+    root = ET.fromstring(html_content)
 
     html_content = html_content.replace(
         "<br>",
