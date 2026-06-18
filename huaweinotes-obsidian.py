@@ -325,11 +325,9 @@ for note_dir in SOURCE_DIR.iterdir():
 
         content = data["content"]
 
-        title = (
-            content.get("title", "")
-            .replace("\n", " ")
-            .strip()
-        )
+        raw_title = content.get("title", "").strip()
+
+        title = re.split(r'[\r\n]+', raw_title)[0].strip()
 
         if not title:
             title = note_dir.name
