@@ -367,8 +367,6 @@ for note_dir in SOURCE_DIR.iterdir():
                     )
                 )
 
-except Exception as ex:
-
             except Exception as ex:
 
                 migration_log.append(
