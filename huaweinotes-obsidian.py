@@ -438,7 +438,7 @@ for note_dir in SOURCE_DIR.iterdir():
             f"migration_date: {MIGRATION_DATE}",
             "",
             f'huawei_uuid: "{content.get("prefix_uuid", "").replace("$", "-")}"',
-            f'huawei_tag_id: "{content.get("tag_id", "")}"',
+            f'huawei_tag_id: "{content.get("tag_id", "").replace("$", "-")}"',
             f"huawei_folder_id: {content.get('fold_id', '')}",
             f'huawei_version: "{content.get("version", "")}"',
             "",
