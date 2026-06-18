@@ -18,9 +18,11 @@ SOURCE_DIR = Path.home() / "Documents" / "my" / "Kitty" / "HuaweiExport"
 OUTPUT_DIR = Path.home() / "Documents" / "my" / "Kitty" / "SamsungObsidian"
 
 NOTES_DIR = OUTPUT_DIR / "Notes"
+ATTACHMENTS_DIR = OUTPUT_DIR / "Attachments"
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 NOTES_DIR.mkdir(parents=True, exist_ok=True)
+ATTACHMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 MIGRATION_DATE = datetime.now().strftime("%Y-%m-%d")
 
@@ -221,7 +223,7 @@ def html_content_to_markdown(html_content):
 
         content = inline_to_markdown(element).strip()
 
-        if not content:
+        if not content and element_type != "Attachment":
             continue
 
         if element_type == "Text":
@@ -248,6 +250,14 @@ def html_content_to_markdown(html_content):
                 markdown_lines.append(
                     f"- [ ] {content}"
                 )
+
+        elif element_type == "Attachment":
+
+            filename = Path(content).name
+
+            markdown_lines.append(
+                f"![[{filename}]]"
+            )
 
         else:
             markdown_lines.append(content)
@@ -410,6 +420,32 @@ for note_dir in SOURCE_DIR.iterdir():
             or (note_dir / "attachment").exists()
         )
 
+        attachment_count = 0
+
+        attachment_dir = (
+            note_dir / "attachment"
+        )
+
+        if attachment_dir.exists():
+
+            for attachment_file in attachment_dir.iterdir():
+
+                if attachment_file.is_file():
+
+                    destination = (
+                        ATTACHMENTS_DIR
+                        / attachment_file.name
+                    )
+
+                    if not destination.exists():
+
+                        shutil.copy2(
+                            attachment_file,
+                            destination
+                        )
+
+                    attachment_count += 1
+
         favorite = (
             content.get(
                 "favorite",
@@ -430,8 +466,9 @@ for note_dir in SOURCE_DIR.iterdir():
             )
 
             migration_log.append(
-                f"[ATTACHMENT_SKIPPED] "
-                f"{title}"
+                f"[ATTACHMENT] "
+                f"{title}: "
+                f"{attachment_count} file(s)"
             )
 
         yaml_lines = [
@@ -451,6 +488,7 @@ for note_dir in SOURCE_DIR.iterdir():
             "",
             f"huawei_favorite: {str(favorite).lower()}",
             f"has_attachment: {str(has_attachment).lower()}",
+            f"attachment_count: {attachment_count}",
             "",
             f'huawei_export_dir: "{note_dir.name}"',
         ]
