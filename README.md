@@ -1,139 +1,302 @@
-# Huawei Notes → Obsidian Converter
+# Huawei Notes → Obsidian Migration
 
-Конвертер для миграции заметок из экспорта Huawei Notes (HarmonyOS / EMUI) в Markdown-формат, совместимый с Obsidian.
+Python script for migrating exported Huawei Notes into an Obsidian vault.
 
-## Возможности
+The script converts Huawei note exports into Markdown files with YAML frontmatter, preserves checklists, copies attachments, and generates Obsidian-compatible links to embedded images.
 
-* Конвертация заметок Huawei в Markdown (`.md`)
-* Сохранение даты создания и изменения заметки
-* Сохранение метаданных Huawei в YAML Front Matter
-* Поддержка списков и чекбоксов
-* Поддержка форматирования:
-
-  * жирный текст (`<b>`)
-  * курсив (`<i>`)
-  * подчёркивание (`<u>`)
-  * ссылки (`<a href>`)
-* Автоматическое создание человекочитаемых имён файлов
-* Логирование заметок с вложениями
-* Создание отчёта о миграции
-* Создание CSV-индекса всех заметок
-
-## Сохраняемые метаданные
-
-Для каждой заметки сохраняются:
-
-* Huawei UUID
-* дата создания
-* дата изменения
-* статус "Избранное"
-* Huawei Version
-* Huawei Folder ID
-* Huawei Tag ID
-* информация о наличии вложений
-* дата миграции
-
-Пример YAML Front Matter:
-
-```yaml
 ---
-title: "МЕБЕЛЬ в комнату"
 
-created: 2018-07-18T12:11:52
-modified: 2018-07-22T01:40:00
+## Features
 
-source: Huawei Notes
-migration_date: 2026-06-18
+* Converts Huawei Notes export to Markdown
+* Supports both Huawei formats:
 
-huawei_uuid: "df2911d2-3d47-43d5-b986-2948f89ba2a9"
-huawei_version: "27"
+  * `html_content` (new format)
+  * `content` (fallback format)
+* Converts Huawei checklists into Obsidian task lists
+* Preserves note metadata
+* Copies attachments into the vault
+* Creates embedded image links for Obsidian
+* Generates migration reports
+* Handles duplicate note names safely
+* Produces UTF-8 output
 
-huawei_favorite: false
-has_attachment: false
 ---
-```
 
-## Структура входных данных
+## Input Structure
 
-Ожидается экспорт Huawei Notes следующего вида:
+Huawei export directory:
 
 ```text
 HuaweiExport/
-├── Note_001/
+├── 20240627231442056/
+│   ├── json.js
 │   ├── notePad.html
-│   └── json.js
+│   └── attachment/
+│       └── image.jpg
 │
-├── Note_002/
+├── 20240627231500123/
+│   ├── json.js
 │   ├── notePad.html
-│   └── json.js
+│   └── attachment/
+│       └── photo.png
 │
 └── ...
 ```
 
-Каждая папка содержит одну заметку.
+Each note must reside in its own exported directory.
 
-## Структура результата
+---
+
+## Output Structure
 
 ```text
-HuaweiObsidian/
-├── Notes/
-│   ├── МЕБЕЛЬ в комнату - 2018-07-18.md
-│   ├── Покупки - 2020-05-12.md
-│   └── ...
-│
-├── migration.log
-├── migration_index.csv
-└── migration_report.md
+ObsidianVault/
+└── Notes/
+    ├── Attachments/
+    │   ├── image.jpg
+    │   └── photo.png
+    │
+    ├── Shopping List - 2024-05-01.md
+    ├── Movies - 2022-10-22.md
+    └── ...
 ```
 
-## Настройка
+Attachments are copied automatically into:
 
-Укажите пути к каталогу с экспортом Huawei и каталогу результата:
-
-```python
-SOURCE_DIR = Path.home() / "Downloads" / "HuaweiExport"
-OUTPUT_DIR = Path.home() / "Downloads" / "HuaweiObsidian"
+```text
+Notes/Attachments/
 ```
 
-## Запуск
+and referenced from notes using standard Obsidian embeds:
 
-Требования:
+```markdown
+![[Attachments/image.jpg]]
+```
 
-* Python 3.9+
-* сторонние библиотеки не требуются
+---
 
-Проверка версии Python:
+## Requirements
+
+Python 3.10+
+
+No third-party libraries are required.
+
+Only standard library modules are used:
+
+* pathlib
+* json
+* html
+* xml.etree.ElementTree
+* shutil
+* csv
+* datetime
+* re
+* unicodedata
+
+---
+
+## Usage
 
 ```bash
-python3 --version
+python huaweinotes-obsidian.py <source_dir> <output_dir>
 ```
 
-Запуск:
+Example:
 
 ```bash
-python3 migrate_huawei.py
+python huaweinotes-obsidian.py \
+    ~/HuaweiExport \
+    ~/MyObsidianVault
 ```
 
-После завершения работы появится каталог `HuaweiObsidian`, который можно открыть как Vault в Obsidian.
+---
 
-## Обработка вложений
+## Examples
 
-Текущая версия конвертирует только текстовую часть заметок.
+### Regular text
 
-Если заметка содержит вложения (изображения, аудио, документы и т.д.):
+Huawei:
 
-* текст заметки будет импортирован;
-* в YAML будет установлен флаг `has_attachment: true`;
-* информация о вложении будет записана в `migration.log`;
-* сами вложения не импортируются.
+```text
+Text|Hello world
+```
 
-## Отказоустойчивость
+Obsidian:
 
-Если `html_content` заметки содержит ошибки XML, конвертер автоматически переключается на резервный источник данных (`content`) и продолжает миграцию.
+```markdown
+Hello world
+```
 
-Это позволяет успешно обработать большие архивы заметок даже при наличии отдельных повреждённых записей.
+---
 
-## Статус
+### Checklist
 
-Проект находится на стадии прототипа и тестируется на реальном экспорте Huawei Notes (~1000 заметок).
+Huawei:
+
+```text
+Bullet|0Buy milk
+Bullet|1Call mom
+```
+
+Obsidian:
+
+```markdown
+- [ ] Buy milk
+- [x] Call mom
+```
+
+---
+
+### Attachment
+
+Huawei:
+
+```text
+Attachment|/path/to/image.jpg
+```
+
+Obsidian:
+
+```markdown
+![[Attachments/image.jpg]]
+```
+
+---
+
+## Frontmatter
+
+Each note receives YAML metadata:
+
+```yaml
+---
+title: "Shopping List"
+
+created: 2024-01-01T10:00:00
+modified: 2024-01-02T12:00:00
+
+source: Huawei Notes
+migration_date: 2026-06-19
+
+huawei_uuid: "..."
+huawei_tag_id: "..."
+huawei_folder_id: 123
+
+huawei_favorite: false
+has_attachment: true
+attachment_count: 3
+---
+```
+
+---
+
+## Generated Files
+
+### migration.log
+
+Contains:
+
+* parsing errors
+* HTML fallback events
+* attachment information
+* unexpected exceptions
+
+Example:
+
+```text
+[ATTACHMENT] Movies: 3 file(s)
+
+[HTML_FALLBACK] Travel Checklist
+ERROR: undefined entity
+```
+
+---
+
+### migration_index.csv
+
+Index of all converted notes.
+
+Columns:
+
+```text
+file
+title
+created
+modified
+favorite
+attachment
+```
+
+---
+
+### migration_report.md
+
+Human-readable migration summary.
+
+Example:
+
+```text
+Total notes: 1054
+Converted: 1054
+With attachments: 87
+Favorites: 23
+Errors: 0
+```
+
+---
+
+## Huawei Formats Supported
+
+### New format
+
+Uses:
+
+```json
+content.html_content
+```
+
+Converted through XML parsing.
+
+Supports:
+
+* text
+* checklists
+* formatting
+* attachments
+
+---
+
+### Legacy format
+
+Uses:
+
+```json
+content.content
+```
+
+Automatically used when:
+
+* `html_content` is missing
+* HTML parsing fails
+
+---
+
+## Notes
+
+Huawei exports are not entirely consistent.
+
+The script therefore:
+
+1. Tries `html_content`
+2. Falls back to legacy `content`
+3. Logs any parsing problems
+4. Continues migration without stopping
+
+This allows large exports (1000+ notes) to be migrated in a single run.
+
+---
+
+## License
+
+MIT License
 
