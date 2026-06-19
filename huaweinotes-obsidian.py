@@ -6,6 +6,7 @@ import html
 import json
 import re
 import shutil
+import sys
 import unicodedata
 from datetime import datetime
 from pathlib import Path
@@ -15,9 +16,35 @@ from xml.etree import ElementTree as ET
 # НАСТРОЙКИ
 # ======================================================================
 
+if len(sys.argv) != 3:
 
-SOURCE_DIR = Path.home() / "Documents" / "my" / "Kitty" / "HuaweiExport"
-OUTPUT_DIR = Path.home() / "Documents" / "my" / "Kitty" / "SamsungObsidian"
+    print(
+        "\nUsage:\n"
+        "    python migrate_notes.py <source_dir> <output_dir>\n\n"
+        "Example:\n"
+        "    python migrate_notes.py "
+        "/path/to/HuaweiExport "
+        "/path/to/ObsidianVault\n"
+    )
+
+    sys.exit(1)
+
+SOURCE_DIR = Path(
+    sys.argv[1]
+).expanduser()
+
+OUTPUT_DIR = Path(
+    sys.argv[2]
+).expanduser()
+
+if not SOURCE_DIR.exists():
+
+    print(
+        f"Source directory not found:\n"
+        f"{SOURCE_DIR}"
+    )
+
+    sys.exit(1)
 
 NOTES_DIR = OUTPUT_DIR / "Notes"
 ATTACHMENTS_DIR = NOTES_DIR / "Attachments"
@@ -25,6 +52,12 @@ ATTACHMENTS_DIR = NOTES_DIR / "Attachments"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 NOTES_DIR.mkdir(parents=True, exist_ok=True)
 ATTACHMENTS_DIR.mkdir(parents=True, exist_ok=True)
+
+print(f"Source:      {SOURCE_DIR}")
+print(f"Output:      {OUTPUT_DIR}")
+print(f"Notes dir:   {NOTES_DIR}")
+print(f"Attachments: {ATTACHMENTS_DIR}")
+print()
 
 MIGRATION_DATE = datetime.now().strftime("%Y-%m-%d")
 
