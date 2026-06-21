@@ -253,13 +253,6 @@ def html_content_to_markdown(html_content):
 
     root = ET.fromstring(html_content)
 
-    html_content = html_content.replace(
-        "<br>",
-        "<br/>"
-    )
-
-    root = ET.fromstring(html_content)
-
     for element in root.findall("element"):
 
         element_type = element.attrib.get(
