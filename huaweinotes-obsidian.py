@@ -242,8 +242,9 @@ def html_content_to_markdown(html_content):
 
     markdown_lines = []
 
-    html_content = html.unescape(
-        html_content
+    html_content = html_content.replace(
+        "&nbsp;",
+        " "
     )
 
     html_content = html_content.replace(
